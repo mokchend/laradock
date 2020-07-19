@@ -8,9 +8,14 @@ node {
      commit_id = readFile('.git/commit-id').trim()
    }
    
-   stage('Stage 01') {
-     println "*** Process stage 01"
-   }                                          
+   stage('Stage 01 - Build workspace') {
+     println "*** Process stage 01 - Building workspace"
+     steps {
+              sh "docker-compose build workspace"
+           }
+     
+   } 
+   
    
    stage('Stage 02') {
      println "*** Process stage 02"
