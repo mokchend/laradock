@@ -1,0 +1,8 @@
+node {
+   stage('Stage 01') {
+     println "*** Process stage 01"
+   }                                          
+   stage('Stage 02') {
+     println "*** Process stage 02"
+   }
+}                                          
