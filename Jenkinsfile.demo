@@ -10,10 +10,7 @@ node {
    
    stage('Stage 01 - Build workspace') {
      println "*** Process stage 01 - Building workspace"
-     steps {
-              sh "docker-compose build workspace"
-           }
-     
+     sh "docker-compose build workspace"     
    } 
    
    
