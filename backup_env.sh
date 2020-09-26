@@ -1,0 +1,1 @@
+cp .env /code/dotfiles/config/laradock-generic.env
