@@ -1,0 +1,81 @@
+server {
+    
+
+    listen 80;
+    listen [::]:80;
+
+    # For https
+    listen 443 ssl;
+    listen [::]:443 ssl ipv6only=on;
+    ssl_certificate /etc/nginx/ssl/default.crt;
+    ssl_certificate_key /etc/nginx/ssl/default.key;
+
+    server_name dev.localhost;
+    root /var/www;
+    index index.php index.html index.htm;
+
+    charset utf-8;
+
+    # https://mnshankar.wordpress.com/2014/03/19/nginx-config-for-hosting-multiple-projects-in-sibling-folders/
+    # handle static files within project.. break at end to avoid recursive redirect
+    location ~blog(\d*)/((.*)\.(?:css|cur|js|jpg|jpeg|gif|htc|ico|png|html|xml))$ {
+        rewrite blog(\d*)/((.*)\.(?:css|cur|js|jpg|jpeg|gif|htc|ico|png|html|xml))$ /blog$1/public/$2 break;
+    }    
+    location ~ssc(\d*)/((.*)\.(?:css|cur|js|jpg|jpeg|gif|htc|ico|png|html|xml))$ {
+        rewrite ssc(\d*)/((.*)\.(?:css|cur|js|jpg|jpeg|gif|htc|ico|png|html|xml))$ /ssc$1/public/$2 break;
+    }    
+
+    location /sonar/ {
+        root /;
+        proxy_bind 192.168.1.6;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;        
+        proxy_pass http://sonar.localhost:9100;
+    }
+
+    location / {
+         try_files $uri $uri/ /index.php$is_args$args;
+    }
+
+    location /blog {
+        rewrite ^/blog/(.*)$ /blog/public/index.php?$1 last;
+    }
+
+    location /ssc {
+        rewrite ^/ssc/(.*)$ /salesforce-sandboxes-cockpit/public/index.php?$1 last;
+    }
+
+
+    location /project1 {
+         rewrite ^/project1/(.*)$ /project1/public/index.php?$1 last;
+    }
+
+    location /project2 {
+        rewrite ^/project2/(.*)$ /project2/public/index.php?$1 last;
+    }
+
+
+    location ~ \.php$ {
+        try_files $uri /index.php =404;
+        fastcgi_pass php-upstream;
+        fastcgi_index index.php;
+        fastcgi_buffers 16 16k;
+        fastcgi_buffer_size 32k;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        #fixes timeouts
+        fastcgi_read_timeout 600;
+        include fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/letsencrypt/;
+        log_not_found off;
+    }
+
+    error_log /var/log/nginx/ssc_error.log;
+    access_log /var/log/nginx/ssc_access.log;
+}

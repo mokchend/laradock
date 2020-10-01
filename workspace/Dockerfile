@@ -94,6 +94,28 @@ RUN set -xe; \
 #   - INSTALL_NODE=false
 #   - ...
 #
+# TODO: sudo is required to solve issue with mounted file system rights when doing rsynch or copy ?!
+RUN apt-get update && \
+    apt-get install -y ant && \
+    apt-get install -y rsync && \
+    apt-get install -y sudo && \
+    apt-get install -y maven && \
+    apt-get install -y openjdk-8-jdk && \
+    apt-get clean;
+
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
+
+# Install groovy
+# Use curl -L to follow redirects
+# Also, use sed to make a workaround for https://issues.apache.org/jira/browse/GROOVY-7906
+RUN curl -L https://bintray.com/artifact/download/groovy/maven/apache-groovy-binary-2.4.8.zip -o /tmp/groovy.zip && \
+    cd /usr/local && \
+    unzip /tmp/groovy.zip && \
+    rm /tmp/groovy.zip && \
+    ln -s /usr/local/groovy-2.4.8 groovy && \
+    /usr/local/groovy/bin/groovy -v && \
+    cd /usr/local/bin && \
+    ln -s /usr/local/groovy/bin/groovy groovy    
 
 ###########################################################################
 # Set Timezone

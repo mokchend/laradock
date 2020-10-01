@@ -156,6 +156,8 @@ services:
         - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
         - docker-in-docker:/certs/client
         - ./php-worker/supervisord.d:/etc/supervisord.d
+        - /data01:/data01
+        - /code:/code
       extra_hosts:
         - "dockerhost:${DOCKER_HOST_IP}"
       ports:
@@ -506,6 +508,8 @@ services:
         - backend
 
 ### PostgreSQL ###########################################
+### WARNING: the docker bind volume is created but never used as we specified ${DATA_PATH_HOST}/postgres 
+### as volume path
     postgres:
       build:
         context: ./postgres
@@ -514,6 +518,8 @@ services:
       volumes:
         - ${DATA_PATH_HOST}/postgres:/var/lib/postgresql/data
         - ${POSTGRES_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
+        - /data01:/data01
+        - /code:/code
       ports:
         - "${POSTGRES_PORT}:5432"
       environment:
@@ -537,10 +543,17 @@ services:
         - POSTGRES_CONFLUENCE_USER=${CONFLUENCE_POSTGRES_USER}
         - POSTGRES_CONFLUENCE_PASSWORD=${CONFLUENCE_POSTGRES_PASSWORD}
 
+        # RSF
         - RSF_PROD_POSTGRES_INIT=${RSF_PROD_POSTGRES_INIT}
         - RSF_PROD_POSTGRES_DB=${RSF_PROD_POSTGRES_DB}
         - RSF_PROD_POSTGRES_USER=${RSF_PROD_POSTGRES_USER}
         - RSF_PROD_POSTGRES_PASSWORD=${RSF_PROD_POSTGRES_PASSWORD}
+
+        # Salesforce Sandboxes Cockpit 
+        - SSC_DEV_POSTGRES_INIT=${SSC_DEV_POSTGRES_INIT}
+        - SSC_DEV_POSTGRES_DB=${SSC_DEV_POSTGRES_DB}
+        - SSC_DEV_POSTGRES_USER=${SSC_DEV_POSTGRES_USER}
+        - SSC_DEV_POSTGRES_PASSWORD=${SSC_DEV_POSTGRES_PASSWORD}
 
       networks:
         - backend
@@ -1727,6 +1740,8 @@ services:
         - ${DATA_PATH_HOST}/sonarqube/logs:/opt/sonarqube/logs
         - ${DATA_PATH_HOST}/sonarqube/extensions:/opt/sonarqube/extensions
         - ${DATA_PATH_HOST}/sonarqube/plugins:/opt/sonarqube/lib/bundled-plugins
+        - /data01:/data01
+        - /code:/code
       ports:
         - ${SONARQUBE_PORT}:9000
       depends_on:
